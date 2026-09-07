@@ -74,7 +74,7 @@ object PdfSecurity {
                 permissions.toAccessPermission()
             )
             policy.encryptionKeyLength = strength.keyLength
-            policy.preferAES = true
+            policy.setPreferAES(true)
             document.protect(policy)
         }
     }

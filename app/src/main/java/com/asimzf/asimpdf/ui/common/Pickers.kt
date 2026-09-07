@@ -4,7 +4,12 @@ import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import com.asimzf.asimpdf.ui.PdfViewModel
+import java.io.File
 
 /** Opens the system file picker filtered to PDFs. */
 @Composable
@@ -55,13 +60,11 @@ fun rememberFileSaver(mimeType: String, onChosen: (Uri) -> Unit): (String) -> Un
  */
 @Composable
 fun rememberDocumentExporter(
-    viewModel: com.asimzf.asimpdf.ui.PdfViewModel,
+    viewModel: PdfViewModel,
     mimeType: String = "application/pdf",
     message: String = "Saved"
-): (java.io.File, String) -> Unit {
-    var pending by androidx.compose.runtime.remember {
-        androidx.compose.runtime.mutableStateOf<java.io.File?>(null)
-    }
+): (File, String) -> Unit {
+    var pending by remember { mutableStateOf<File?>(null) }
     val launch = rememberFileSaver(mimeType) { uri ->
         pending?.let { file -> viewModel.exportFileTo(file, uri, message) }
         pending = null
