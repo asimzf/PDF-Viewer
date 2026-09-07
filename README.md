@@ -88,10 +88,27 @@ connection **for the build only** — the app itself never uses one.
 ./gradlew assembleDebug          # APK in app/build/outputs/apk/debug/
 ./gradlew installDebug           # build and install on a connected device
 ./gradlew testDebugUnitTest      # unit tests
+./gradlew bundleRelease          # AAB for Google Play (unsigned without a keystore)
 ```
 
-- `minSdk` 26, `targetSdk`/`compileSdk` 35
-- Kotlin 2.0, Compose (Material 3), AGP 8.7
+- `minSdk` 26, `targetSdk`/`compileSdk` 36
+- Kotlin 2.0, Compose (Material 3), AGP 8.9
+
+Release signing reads `keystore.properties` from the project root, or the
+`ASIMPDF_KEYSTORE`, `ASIMPDF_KEYSTORE_PASSWORD`, `ASIMPDF_KEY_ALIAS` and
+`ASIMPDF_KEY_PASSWORD` environment variables. Both are git-ignored; without them
+the release build is simply left unsigned.
+
+## Publishing
+
+- [Publishing to Google Play](docs/publishing-to-google-play.md) — account,
+  signing key, store listing copy, and the Data safety answers.
+- [Distribution and visibility](docs/distribution-and-visibility.md) — Play
+  programmes, F-Droid, IzzyOnDroid and where an app like this finds its users.
+- [Privacy policy](docs/privacy-policy.md) — the one Play requires; publish it
+  with GitHub Pages from the `/docs` folder.
+- `fastlane/metadata/android/en-US/` holds the store title, descriptions,
+  changelog and screenshots, in the layout F-Droid and IzzyOnDroid read.
 
 ## How it is put together
 

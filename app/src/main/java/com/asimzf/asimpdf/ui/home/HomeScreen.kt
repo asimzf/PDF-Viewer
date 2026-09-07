@@ -54,7 +54,8 @@ fun HomeScreen(
     onForgetRecent: (String) -> Unit,
     onClearRecents: () -> Unit,
     onImagesToPdf: () -> Unit,
-    onMerge: () -> Unit
+    onMerge: () -> Unit,
+    onAbout: () -> Unit
 ) {
     var menuOpen by remember { mutableStateOf(false) }
     Scaffold(
@@ -71,19 +72,25 @@ fun HomeScreen(
                     }
                 },
                 actions = {
-                    if (recents.isNotEmpty()) {
-                        IconButton(onClick = { menuOpen = true }) {
-                            Icon(AppIcons.More, contentDescription = "More")
-                        }
-                        DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
-                            DropdownMenuItem(
-                                text = { Text("Clear recent list") },
-                                onClick = {
-                                    menuOpen = false
-                                    onClearRecents()
-                                }
-                            )
-                        }
+                    IconButton(onClick = { menuOpen = true }) {
+                        Icon(AppIcons.More, contentDescription = "More")
+                    }
+                    DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
+                        DropdownMenuItem(
+                            text = { Text("Clear recent list") },
+                            enabled = recents.isNotEmpty(),
+                            onClick = {
+                                menuOpen = false
+                                onClearRecents()
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("About asimPDF") },
+                            onClick = {
+                                menuOpen = false
+                                onAbout()
+                            }
+                        )
                     }
                 }
             )

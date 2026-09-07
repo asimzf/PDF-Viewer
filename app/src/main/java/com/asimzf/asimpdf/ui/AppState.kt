@@ -14,6 +14,7 @@ sealed interface Screen {
     data object Viewer : Screen
     data object Organize : Screen
     data object Tools : Screen
+    data object About : Screen
     data class Tool(val tool: PdfToolId) : Screen
 }
 

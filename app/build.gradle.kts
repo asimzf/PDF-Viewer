@@ -1,21 +1,50 @@
+import java.io.FileInputStream
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
 }
 
+/**
+ * Release signing details come from a local keystore.properties (never committed)
+ * or from environment variables on a build machine. When neither is present the
+ * release build is simply left unsigned, so anyone can still build the project.
+ */
+val keystoreProperties = Properties().apply {
+    val file = rootProject.file("keystore.properties")
+    if (file.exists()) FileInputStream(file).use { load(it) }
+}
+
+fun signingValue(key: String, environmentName: String): String? =
+    keystoreProperties.getProperty(key) ?: System.getenv(environmentName)
+
 android {
     namespace = "com.asimzf.asimpdf"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.asimzf.asimpdf"
         minSdk = 26
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 1
         versionName = "1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         resourceConfigurations += listOf("en")
+    }
+
+    signingConfigs {
+        create("release") {
+            val storePath = signingValue("storeFile", "ASIMPDF_KEYSTORE")
+            val store = storePath?.let { rootProject.file(it) }
+            if (store != null && store.exists()) {
+                storeFile = store
+                storePassword = signingValue("storePassword", "ASIMPDF_KEYSTORE_PASSWORD")
+                keyAlias = signingValue("keyAlias", "ASIMPDF_KEY_ALIAS")
+                keyPassword = signingValue("keyPassword", "ASIMPDF_KEY_PASSWORD")
+            }
+        }
     }
 
     buildTypes {
@@ -24,6 +53,7 @@ android {
             versionNameSuffix = "-debug"
         }
         release {
+            signingConfig = signingConfigs.getByName("release").takeIf { it.storeFile != null }
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(
@@ -44,6 +74,14 @@ android {
 
     buildFeatures {
         compose = true
+        buildConfig = true
+    }
+
+    bundle {
+        // Play delivers only the pieces a given device needs.
+        language { enableSplit = true }
+        density { enableSplit = true }
+        abi { enableSplit = true }
     }
 
     packaging {

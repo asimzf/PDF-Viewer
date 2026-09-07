@@ -7,13 +7,14 @@ import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -25,6 +26,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import com.asimzf.asimpdf.print.Printing
@@ -38,6 +40,7 @@ import com.asimzf.asimpdf.ui.common.rememberFileSaver
 import com.asimzf.asimpdf.ui.common.rememberImagePicker
 import com.asimzf.asimpdf.ui.common.rememberMultiplePdfPicker
 import com.asimzf.asimpdf.ui.common.rememberPdfPicker
+import com.asimzf.asimpdf.ui.about.AboutScreen
 import com.asimzf.asimpdf.ui.home.HomeScreen
 import com.asimzf.asimpdf.ui.organize.OrganizeScreen
 import com.asimzf.asimpdf.ui.theme.AsimPdfTheme
@@ -56,6 +59,9 @@ class MainActivity : ComponentActivity() {
     private val viewModel: PdfViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        // Android 16 draws behind the system bars whatever we ask for, so opt in
+        // properly and let each screen's scaffold handle its own insets.
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         setContent {
             AsimPdfTheme {
@@ -141,83 +147,87 @@ private fun AsimPdfApp(viewModel: PdfViewModel) {
             is Screen.Tool -> viewModel.setScreen(Screen.Tools)
             Screen.Tools, Screen.Organize -> viewModel.setScreen(Screen.Viewer)
             Screen.Viewer -> goHome()
+            Screen.About -> viewModel.setScreen(Screen.Home)
             Screen.Home -> Unit
         }
     }
 
-    Scaffold(
-        snackbarHost = { SnackbarHost(snackbarHost) }
-    ) { padding ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-        ) {
-            when (val screen = state.screen) {
-                Screen.Home -> HomeScreen(
-                    recents = state.recents,
-                    onOpen = openPdf,
-                    onOpenRecent = { uri -> viewModel.openDocument(uri) },
-                    onForgetRecent = { uri -> viewModel.forgetRecent(uri) },
-                    onClearRecents = { viewModel.clearRecents() },
-                    onImagesToPdf = imagesFromHome,
-                    onMerge = mergeFromHome
-                )
+    Box(modifier = Modifier.fillMaxSize()) {
+        when (val screen = state.screen) {
+            Screen.Home -> HomeScreen(
+                recents = state.recents,
+                onOpen = openPdf,
+                onOpenRecent = { uri -> viewModel.openDocument(uri) },
+                onForgetRecent = { uri -> viewModel.forgetRecent(uri) },
+                onClearRecents = { viewModel.clearRecents() },
+                onImagesToPdf = imagesFromHome,
+                onMerge = mergeFromHome,
+                onAbout = { viewModel.setScreen(Screen.About) }
+            )
 
-                Screen.Viewer -> ViewerScreen(
-                    viewModel = viewModel,
-                    state = state,
-                    onBack = goHome,
-                    onSave = { viewModel.save { saveAs(state.document?.name ?: "document.pdf") } },
-                    onSaveAs = { saveAs(state.document?.name ?: "document.pdf") },
-                    onShare = {
-                        state.document?.let { document ->
-                            Sharing.shareFile(context, document.workFile, title = "Share PDF")
-                        }
-                    },
-                    onPrint = {
-                        state.document?.let { document ->
-                            Printing.print(
-                                context,
-                                document.workFile,
-                                document.name,
-                                document.pageCount
-                            )
-                        }
-                    },
-                    onOrganize = { viewModel.setScreen(Screen.Organize) },
-                    onTools = { viewModel.setScreen(Screen.Tools) }
-                )
+            Screen.About -> AboutScreen(onBack = { viewModel.setScreen(Screen.Home) })
 
-                Screen.Organize -> OrganizeScreen(
-                    viewModel = viewModel,
-                    state = state,
-                    onBack = { viewModel.setScreen(Screen.Viewer) }
-                )
-
-                Screen.Tools -> ToolsScreen(
-                    documentName = state.document?.name,
-                    onBack = { viewModel.setScreen(Screen.Viewer) },
-                    onSelect = { tool ->
-                        if (tool == PdfToolId.ORGANIZE) {
-                            viewModel.setScreen(Screen.Organize)
-                        } else {
-                            viewModel.setScreen(Screen.Tool(tool))
-                        }
+            Screen.Viewer -> ViewerScreen(
+                viewModel = viewModel,
+                state = state,
+                onBack = goHome,
+                onSave = { viewModel.save { saveAs(state.document?.name ?: "document.pdf") } },
+                onSaveAs = { saveAs(state.document?.name ?: "document.pdf") },
+                onShare = {
+                    state.document?.let { document ->
+                        Sharing.shareFile(context, document.workFile, title = "Share PDF")
                     }
-                )
+                },
+                onPrint = {
+                    state.document?.let { document ->
+                        Printing.print(
+                            context,
+                            document.workFile,
+                            document.name,
+                            document.pageCount
+                        )
+                    }
+                },
+                onOrganize = { viewModel.setScreen(Screen.Organize) },
+                onTools = { viewModel.setScreen(Screen.Tools) }
+            )
 
-                is Screen.Tool -> ToolDetailScreen(
-                    tool = screen.tool,
-                    viewModel = viewModel,
-                    state = state,
-                    onBack = { viewModel.setScreen(Screen.Tools) },
-                    onOpenOrganize = { viewModel.setScreen(Screen.Organize) }
-                )
-            }
+            Screen.Organize -> OrganizeScreen(
+                viewModel = viewModel,
+                state = state,
+                onBack = { viewModel.setScreen(Screen.Viewer) }
+            )
 
-            BusyOverlay(progress = state.busy)
+            Screen.Tools -> ToolsScreen(
+                documentName = state.document?.name,
+                onBack = { viewModel.setScreen(Screen.Viewer) },
+                onSelect = { tool ->
+                    if (tool == PdfToolId.ORGANIZE) {
+                        viewModel.setScreen(Screen.Organize)
+                    } else {
+                        viewModel.setScreen(Screen.Tool(tool))
+                    }
+                }
+            )
+
+            is Screen.Tool -> ToolDetailScreen(
+                tool = screen.tool,
+                viewModel = viewModel,
+                state = state,
+                onBack = { viewModel.setScreen(Screen.Tools) },
+                onOpenOrganize = { viewModel.setScreen(Screen.Organize) }
+            )
         }
+
+        BusyOverlay(progress = state.busy)
+
+        SnackbarHost(
+            hostState = snackbarHost,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .navigationBarsPadding()
+                .imePadding()
+        )
     }
 
     state.passwordRequest?.let { uri ->
