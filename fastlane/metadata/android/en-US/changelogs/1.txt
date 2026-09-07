@@ -1,0 +1,7 @@
+First release.
+
+Read, mark up and reorganise PDFs entirely on your device: search, night mode,
+annotations, signatures, page management, merge, split, watermarks, page
+numbers, compression, passwords, form filling and image or text export.
+
+No ads, no accounts, no analytics, no permissions and no internet access.

@@ -1,0 +1,48 @@
+asimPDF is a complete PDF viewer and editor that works entirely on your device.
+
+It has no advertising, no accounts, no analytics and no tracking. It requests no
+Android permissions at all, and it does not hold the internet permission, so it
+is not able to send your documents anywhere even if it wanted to.
+
+READ
+• Smooth continuous scrolling or one page at a time
+• Pinch and double-tap zoom
+• Night mode for comfortable reading in the dark
+• Search the whole document, with matches highlighted on the page
+• Jump around using the document's own table of contents
+• Print through Android's printing service, or share to any app
+
+MARK UP
+• Draw freehand in any colour and thickness
+• Highlight, underline and strike out
+• Rectangles, ovals, lines and arrows
+• Add text boxes and sticky notes
+• Sign with your finger and place the signature anywhere
+• Add images and stamps
+• Black out private information, then flatten the page so it is really gone
+• Undo and redo, before and after applying
+
+ORGANISE
+• Thumbnail view with multi-select
+• Rotate, reorder, duplicate, extract and delete pages
+• Insert blank pages, or every page of another PDF
+
+TOOLS
+• Merge several PDFs into one
+• Split by page count, at a page, or pull out a range
+• Crop margins
+• Watermarks, page numbers, headers and footers
+• Compress to make a file smaller before sending it
+• Password protection with AES-128 or AES-256, and permission controls
+• Edit the title, author, subject and keywords, or strip metadata entirely
+• Fill in and flatten PDF forms
+• Export pages as PNG or JPEG, or extract the text
+• Build a PDF from photos and scans
+
+YOUR FILES STAY YOURS
+The document you open is copied into asimPDF's private storage, so editing never
+touches your original until you choose to save. Everything happens on the
+processor in your hand.
+
+asimPDF is free and open source under the MIT licence.
+Source code: https://github.com/asimzf/PDF-Viewer
